@@ -1,3 +1,5 @@
 langchain
 gpt4all
 fastf1
+pandas
+numpy
