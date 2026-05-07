@@ -72,89 +72,111 @@
 #     print("\n🤖 F1 Chatbot Response:", response)
 
 
-import fastf1
-from langchain_community.llms import GPT4All
-from langchain_core.prompts import PromptTemplate
-from pathlib import Path
-import warnings
-import os
+# import fastf1
+# from langchain_community.llms import GPT4All
+# from langchain_core.prompts import PromptTemplate
+# from pathlib import Path
+# import warnings
+# import os
 
-# Suppress DLL warnings
-warnings.filterwarnings("ignore", message="Failed to load llamamodel*")
-warnings.filterwarnings("ignore", message="pick_driver is deprecated")
+# # Suppress DLL warnings
+# warnings.filterwarnings("ignore", message="Failed to load llamamodel*")
+# warnings.filterwarnings("ignore", message="pick_driver is deprecated")
 
-# Set absolute paths consistently
-PROJECT_ROOT = Path("D:/Python_Project/f1_chatbot").resolve()
-MODEL_PATH = PROJECT_ROOT / "models" / "Meta-Llama-3-8B-Instruct.Q4_0.gguf"
-CACHE_DIR = PROJECT_ROOT / "data" / "fastf1_cache"
+# # Set absolute paths consistently
+# PROJECT_ROOT = Path("D:/Python_Project/f1_chatbot").resolve()
+# MODEL_PATH = PROJECT_ROOT / "models" / "Meta-Llama-3-8B-Instruct.Q4_0.gguf"
+# CACHE_DIR = PROJECT_ROOT / "data" / "fastf1_cache"
 
-# Verify model exists
-if not MODEL_PATH.exists():
-    print(f"❌ Model not found at: {MODEL_PATH}")
-    exit(1)
+# # Verify model exists
+# if not MODEL_PATH.exists():
+#     print(f"❌ Model not found at: {MODEL_PATH}")
+#     exit(1)
 
-print(f"✅ Model found at: {MODEL_PATH}")
+# print(f"✅ Model found at: {MODEL_PATH}")
 
-# Initialize GPT4All with absolute path as string
-llm = GPT4All(model=str(MODEL_PATH), verbose=True)
+# # Initialize GPT4All with absolute path as string
+# llm = GPT4All(model=str(MODEL_PATH), verbose=True)
 
-# Prompt template
-template = """
-You are an F1 assistant. Use the following race data when available.
-If no data is provided, answer from general F1 knowledge.
+# # Prompt template
+# template = """
+# You are an F1 assistant. Use the following race data when available.
+# If no data is provided, answer from general F1 knowledge.
 
-Question: {question}
-Data: {data}
-"""
+# Question: {question}
+# Data: {data}
+# """
 
-prompt = PromptTemplate(template=template, input_variables=["question", "data"])
-chain = prompt | llm
+# prompt = PromptTemplate(template=template, input_variables=["question", "data"])
+# chain = prompt | llm
 
-# Create cache directory
-CACHE_DIR.mkdir(parents=True, exist_ok=True)
-fastf1.Cache.enable_cache(str(CACHE_DIR))
+# # Create cache directory
+# CACHE_DIR.mkdir(parents=True, exist_ok=True)
+# fastf1.Cache.enable_cache(str(CACHE_DIR))
 
-print(f"✅ FastF1 cache enabled at: {CACHE_DIR}")
+# print(f"✅ FastF1 cache enabled at: {CACHE_DIR}")
 
-try:
-    # Load the session
-    print("📊 Loading Miami GP 2023 data...")
-    session = fastf1.get_session(2023, "Miami", "R")
-    session.load()
-    print("✅ Session loaded successfully")
+# try:
+#     # Load the session
+#     print("📊 Loading Miami GP 2023 data...")
+#     session = fastf1.get_session(2023, "Miami", "R")
+#     session.load()
+#     print("✅ Session loaded successfully")
     
-    # FIX: Use pick_drivers instead of pick_driver (deprecated)
-    verstappen_laps = session.laps.pick_drivers(["VER"])  # Note: pick_drivers (plural) with list
+#     # FIX: Use pick_drivers instead of pick_driver (deprecated)
+#     verstappen_laps = session.laps.pick_drivers(["VER"])  # Note: pick_drivers (plural) with list
     
-    if len(verstappen_laps) == 0:
-        print("⚠️ No laps found for VER")
-        fastest_lap = None
-    else:
-        fastest_lap = verstappen_laps.pick_fastest()
+#     if len(verstappen_laps) == 0:
+#         print("⚠️ No laps found for VER")
+#         fastest_lap = None
+#     else:
+#         fastest_lap = verstappen_laps.pick_fastest()
     
-    if fastest_lap is not None and not fastest_lap.empty:
-        # Convert LapTime to a readable string
-        lap_time_seconds = fastest_lap['LapTime'].total_seconds()
-        lap_time_str = f"{lap_time_seconds:.3f} seconds"
+#     if fastest_lap is not None and not fastest_lap.empty:
+#         # Convert LapTime to a readable string
+#         lap_time_seconds = fastest_lap['LapTime'].total_seconds()
+#         lap_time_str = f"{lap_time_seconds:.3f} seconds"
         
-        # Additional info
-        lap_number = fastest_lap['LapNumber']
-        compound = fastest_lap['Compound']
+#         # Additional info
+#         lap_number = fastest_lap['LapNumber']
+#         compound = fastest_lap['Compound']
         
-        # Prepare data for the LLM
-        data = f"Verstappen's fastest lap: Lap {lap_number} - {lap_time_str} on {compound} tires."
+#         # Prepare data for the LLM
+#         data = f"Verstappen's fastest lap: Lap {lap_number} - {lap_time_str} on {compound} tires."
         
-        # Ask the question
-        question = "What was Verstappen's fastest lap in Miami GP 2023?"
+#         # Ask the question
+#         question = "What was Verstappen's fastest lap in Miami GP 2023?"
         
-        # Run the chain
-        print("🤔 Generating response...")
-        response = chain.invoke({"question": question, "data": data})
-        print("\n🤖 F1 Chatbot Response:", response)
-    else:
-        print("⚠️ No fastest lap data found")
+#         # Run the chain
+#         print("🤔 Generating response...")
+#         response = chain.invoke({"question": question, "data": data})
+#         print("\n🤖 F1 Chatbot Response:", response)
+#     else:
+#         print("⚠️ No fastest lap data found")
         
-except Exception as e:
-    print(f"❌ Error loading session data: {e}")
-    import traceback
-    traceback.print_exc()
+# except Exception as e:
+#     print(f"❌ Error loading session data: {e}")
+#     import traceback
+#     traceback.print_exc()
+
+
+
+
+from agents.data_agent import get_driver_fastest_lap
+from agents.strategy_agent import explain_strategy
+
+# Example workflow
+question = "Why was Verstappen's fastest lap important in Miami GP 2023?"
+
+# Step 1: Data Agent fetches info
+lap_data = get_driver_fastest_lap(2023, "Miami", "VER")
+
+if lap_data:
+    data_str = f"Lap {lap_data['lap_number']} - {lap_data['lap_time']} on {lap_data['compound']} tires."
+else:
+    data_str = "No lap data found."
+
+# Step 2: Strategy Agent explains
+response = explain_strategy(data_str, question)
+
+print("\n🤖 Race Insights Agent Response:\n", response)
