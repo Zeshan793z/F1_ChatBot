@@ -1,0 +1,6 @@
+venv/ 
+models/
+*.h5
+*.pt
+*.pkl
+*.gguf
