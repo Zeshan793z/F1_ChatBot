@@ -1,4 +1,6 @@
 langchain
+langchain-community
+langchain-core
 gpt4all
 fastf1
 pandas
