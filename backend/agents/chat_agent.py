@@ -1,26 +1,10 @@
-# from langchain_community.llms import GPT4All
-# from langchain_core.prompts import PromptTemplate
-
-# MODEL_PATH = "./models/Meta-Llama-3-8B-Instruct.Q4_0.gguf"
-# llm = GPT4All(model=MODEL_PATH, verbose=False)
-
-# template = """
-# You are an F1 trivia assistant.
-# Answer the following question clearly and concisely.
-
-# Question: {question}
-# """
-
-# prompt = PromptTemplate(template=template, input_variables=["question"])
-# chain = prompt | llm
-
-# def chat(question):
-#     return chain.invoke({"question": question})
-
-
 from langchain_community.llms import GPT4All
 from langchain_core.prompts import PromptTemplate
 from pathlib import Path
+import warnings
+import re
+
+warnings.filterwarnings("ignore", message="Failed to load llamamodel*")
 
 BACKEND_ROOT = Path(__file__).parent.parent
 MODEL_PATH = BACKEND_ROOT / "models" / "Meta-Llama-3-8B-Instruct.Q4_0.gguf"
@@ -32,28 +16,76 @@ if not MODEL_PATH.exists():
     raise FileNotFoundError(f"Model not found at {MODEL_PATH}")
 
 print("✅ Loading chat model...")
-llm = GPT4All(model=str(MODEL_PATH), verbose=False)
 
-# More explicit instructions to prevent echoing
-template = """Answer the following F1 question directly and concisely without repeating the question.
+llm = GPT4All(
+    model=str(MODEL_PATH),
+    verbose=False
+)
 
-Question: {question}
-Answer:"""
+# Llama 3 chat format with system prompt
+template = """<|begin_of_text|><|start_header_id|>system<|end_header_id|>
+You are an F1 expert. Answer questions with ONE short sentence only. Never add notes, follow-ups, or explanations. Just the answer.<|eot_id|>
+<|start_header_id|>user<|end_header_id|>
+{question}<|eot_id|>
+<|start_header_id|>assistant<|end_header_id|>"""
 
 prompt = PromptTemplate(template=template, input_variables=["question"])
 chain = prompt | llm
 
+def clean_response(response: str) -> str:
+    """Remove Llama 3 special tokens and clean up"""
+    # Remove all Llama 3 special tokens
+    tokens_to_remove = [
+        "<|begin_of_text|>",
+        "<|end_of_text|>",
+        "<|start_header_id|>",
+        "<|end_header_id|>",
+        "<|eot_id|>",
+        "system",
+        "user",
+        "assistant"
+    ]
+    
+    for token in tokens_to_remove:
+        response = response.replace(token, "")
+    
+    # Remove any leftover angle bracket content
+    response = re.sub(r'<[^>]+>', '', response)
+    
+    # Remove extra whitespace
+    response = re.sub(r'\s+', ' ', response)
+    
+    # Remove any "A:" prefix
+    response = re.sub(r'^A:\s*', '', response, flags=re.IGNORECASE)
+    
+    # Take only first sentence if there are multiple
+    sentences = re.split(r'[.!?]+', response)
+    if sentences:
+        response = sentences[0].strip()
+        # Add period if missing and not empty
+        if response and not response.endswith('.'):
+            response += '.'
+    
+    return response.strip()
+
 def chat(question: str) -> str:
-    """Answer general F1 questions"""
+    """Answer any F1 question concisely"""
     try:
         response = chain.invoke({"question": question})
-        # Clean up: remove any "Answer:" prefix if present
-        if "Answer:" in response[:20]:
-            response = response.split("Answer:", 1)[-1].strip()
-        # Also remove any quoted question at the beginning
-        lines = response.split('\n')
-        if len(lines) > 1 and "?" in lines[0]:
-            response = '\n'.join(lines[1:]).strip()
-        return response
+        cleaned = clean_response(response)
+        
+        # If cleaning removed everything, return fallback
+        if not cleaned or len(cleaned) < 2:
+            # Try to extract answer from raw response
+            lines = response.split('\n')
+            for line in lines:
+                line = line.strip()
+                if line and not any(token in line for token in ['<|', 'system', 'user', 'assistant']):
+                    if len(line) < 100:  # Reasonable answer length
+                        cleaned = line
+                        break
+        
+        return cleaned if cleaned else "I don't know"
+        
     except Exception as e:
         return f"Error: {str(e)}"

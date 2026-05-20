@@ -1,15 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from backend.agents.data_agent import get_driver_fastest_lap
-from backend.agents.strategy_agent import explain_strategy
-from backend.agents.chat_agent import chat
+from typing import Optional
 
-app = FastAPI(title="F1 Chatbot API", description="API for F1 race data and strategy analysis")
+# Use relative imports (note the dots before agents)
+from .agents.data_agent import get_driver_fastest_lap, get_season_fastest_laps, get_season_driver_performance
+from .agents.strategy_agent import explain_strategy
+from .agents.chat_agent import chat
+
+app = FastAPI(title="F1 Chatbot API")
 
 # Allow CORS for frontend development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React default port
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -22,6 +25,9 @@ async def root():
         "status": "healthy",
         "endpoints": [
             "/fastest-lap?year=2023&gp=Miami&driver=VER",
+            "/season-fastest-laps?year=2024&driver=VER",
+            "/driver-season-performance?year=2024&driver=VER",
+            "/multiple-seasons?years=2023,2024&driver=VER",
             "/strategy?year=2023&gp=Miami&driver=VER&question=...",
             "/chat?question=..."
         ]
@@ -32,6 +38,64 @@ def fastest_lap(year: int, gp: str, driver: str):
     """Get the fastest lap data for a specific driver at a Grand Prix"""
     lap_data = get_driver_fastest_lap(year, gp, driver)
     return {"driver": driver, "year": year, "gp": gp, "lap_data": lap_data}
+
+@app.get("/season-fastest-laps")
+def season_fastest_laps(
+    year: int, 
+    driver: Optional[str] = Query(None, description="Optional driver code (e.g., VER, HAM)")
+):
+    """
+    Get fastest lap data for all races in a season
+    Optionally filter by driver
+    """
+    try:
+        results = get_season_fastest_laps(year, driver)
+        return {
+            "year": year,
+            "driver_filter": driver,
+            "total_races": len(results),
+            "results": results
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/driver-season-performance")
+def driver_season_performance(year: int, driver: str):
+    """
+    Get comprehensive performance data for a driver across a season
+    """
+    try:
+        performance = get_season_driver_performance(year, driver)
+        return performance
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/multiple-seasons")
+def multiple_seasons(
+    years: str, 
+    driver: Optional[str] = Query(None, description="Optional driver code")
+):
+    """
+    Get data across multiple seasons
+    Example: /multiple-seasons?years=2023,2024&driver=VER
+    """
+    try:
+        year_list = [int(y.strip()) for y in years.split(',')]
+        results = {}
+        
+        for year in year_list:
+            if driver:
+                results[str(year)] = get_season_driver_performance(year, driver)
+            else:
+                results[str(year)] = get_season_fastest_laps(year)
+        
+        return {
+            "years": year_list,
+            "driver": driver,
+            "data": results
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/strategy")
 def strategy(year: int, gp: str, driver: str, question: str):

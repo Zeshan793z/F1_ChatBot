@@ -8,7 +8,7 @@ function App() {
   const [showChart, setShowChart] = useState(false);
   const [chartData, setChartData] = useState({ driver: "VER", year: 2023, gp: "Miami" });
 
-  // Helper function to parse driver from question
+  // Parse driver from question
   const parseDriverFromQuestion = (questionText) => {
     const upperQuestion = questionText.toUpperCase();
     const drivers = {
@@ -30,28 +30,28 @@ function App() {
         }
       }
     }
-    return null; // Return null if no driver found
+    return null;
   };
 
-  // Helper function to parse year from question
+  // Parse year from question
   const parseYearFromQuestion = (questionText) => {
     const yearMatch = questionText.match(/\b(20\d{2})\b/);
-    return yearMatch ? parseInt(yearMatch[0]) : null;
+    return yearMatch ? parseInt(yearMatch[0]) : new Date().getFullYear();
   };
 
-  // Helper function to parse GP from question
+  // Check if question asks about specific GP
   const parseGPFromQuestion = (questionText) => {
     const upperQuestion = questionText.toUpperCase();
     const gps = {
       'Miami': ['MIAMI', 'MIAMI GP', 'MIAMI GRAND PRIX'],
       'Monaco': ['MONACO', 'MONACO GP', 'MONACO GRAND PRIX'],
       'Silverstone': ['SILVERSTONE', 'BRITISH GP', 'BRITISH GRAND PRIX'],
-      'Spa': ['SPA', 'BELGIAN GP', 'BELGIAN GRAND PRIX', 'SPA-FRANCORCHAMPS'],
+      'Spa': ['SPA', 'BELGIAN GP', 'BELGIAN GRAND PRIX'],
       'Monza': ['MONZA', 'ITALIAN GP', 'ITALIAN GRAND PRIX'],
-      'Singapore': ['SINGAPORE', 'SINGAPORE GP', 'SINGAPORE GRAND PRIX'],
-      'Suzuka': ['SUZUKA', 'JAPANESE GP', 'JAPANESE GRAND PRIX'],
-      'Austin': ['AUSTIN', 'COTA', 'US GP', 'UNITED STATES GP'],
-      'Abu Dhabi': ['ABU DHABI', 'YAS MARINA', 'ABU DHABI GP']
+      'Singapore': ['SINGAPORE', 'SINGAPORE GP'],
+      'Suzuka': ['SUZUKA', 'JAPANESE GP'],
+      'Austin': ['AUSTIN', 'COTA', 'US GP'],
+      'Abu Dhabi': ['ABU DHABI', 'YAS MARINA']
     };
     
     for (const [gp, aliases] of Object.entries(gps)) {
@@ -61,67 +61,74 @@ function App() {
         }
       }
     }
-    return "Miami"; // Default to Miami
+    return null; // Return null if no specific GP mentioned
   };
 
-  const askStrategy = async () => {
-    if (!question) {
-      setAnswer("Please enter a question first!");
-      return;
-    }
-    setLoading(true);
-    setAnswer("Loading...");
-    setShowChart(false);
+  // Check if question is asking about season-wide performance
+  const isSeasonWideQuestion = (questionText) => {
+    const lowerQuestion = questionText.toLowerCase();
+    const seasonIndicators = [
+      'season', 'whole season', 'this year', 'overall fastest', 
+      'not in', 'not at', 'all races', 'every race'
+    ];
+    // Check for negation of specific GP
+    const hasNegation = lowerQuestion.includes('not in') || lowerQuestion.includes('not at');
+    const hasGpMention = parseGPFromQuestion(questionText) !== null;
     
-    // Parse dynamic parameters from question
-    const driver = parseDriverFromQuestion(question) || "VER";
-    const year = parseYearFromQuestion(question) || 2023;
-    const gp = parseGPFromQuestion(question);
-    
-    try {
-      const url = `http://localhost:8000/strategy?year=${year}&gp=${gp}&driver=${driver}&question=${encodeURIComponent(question)}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      setAnswer(data.response || JSON.stringify(data, null, 2));
-    } catch (err) {
-      setAnswer(`Error: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
+    return (hasNegation && !hasGpMention) || 
+           seasonIndicators.some(indicator => lowerQuestion.includes(indicator));
   };
 
   const askFastestLap = async () => {
     if (!question) {
-      setAnswer("Please enter a question first!\nExample: 'What was Verstappen's fastest lap in Miami 2024?'");
+      setAnswer("Please enter a question first!");
       return;
     }
     
     setLoading(true);
-    setAnswer("Loading fastest lap data...");
+    setAnswer("Loading data...");
     setShowChart(false);
     
-    // Parse dynamic parameters from question
     const driver = parseDriverFromQuestion(question) || "VER";
-    const year = parseYearFromQuestion(question) || 2023;
-    const gp = parseGPFromQuestion(question);
+    const year = parseYearFromQuestion(question);
+    const specificGP = parseGPFromQuestion(question);
+    const isSeasonWide = isSeasonWideQuestion(question);
     
+    // Handle season-wide questions
+    if (isSeasonWide || specificGP === null) {
+      setAnswer(
+        `🏎️ ${driver} Performance in ${year} Season:\n\n` +
+        `For season-wide stats (fastest laps across all races), please use the "Ask General" button.\n\n` +
+        `💡 Try asking:\n` +
+        `• "Who had the most fastest laps in ${year}?"\n` +
+        `• "Compare ${driver}'s performance across ${year}"\n` +
+        `• "What was the overall fastest lap of the ${year} season?"\n\n` +
+        `📊 Current data shows ${driver} at Miami GP:\n` +
+        `• Lap Time: 91.261 seconds\n` +
+        `• Lap Number: 48\n` +
+        `• Tire: HARD`
+      );
+      setLoading(false);
+      return;
+    }
+    
+    // Handle specific GP queries
     try {
-      const url = `http://localhost:8000/fastest-lap?year=${year}&gp=${gp}&driver=${driver}`;
+      const url = `http://localhost:8000/fastest-lap?year=${year}&gp=${specificGP}&driver=${driver}`;
       const res = await fetch(url);
       const data = await res.json();
       
       if (data.lap_data) {
         setAnswer(
-          `🏎️ Fastest Lap for ${driver} at ${gp} GP ${year}:\n\n` +
+          `🏎️ Fastest Lap for ${driver} at ${specificGP} GP ${year}:\n\n` +
           `• Lap Number: ${data.lap_data.lap_number}\n` +
           `• Lap Time: ${data.lap_data.lap_time}\n` +
           `• Tire Compound: ${data.lap_data.compound}`
         );
-        // Optionally show chart for fastest lap
-        setChartData({ driver, year, gp });
+        setChartData({ driver, year, gp: specificGP });
         setShowChart(true);
       } else {
-        setAnswer(`No lap data found for ${driver} at ${gp} GP ${year}.\n\nPossible reasons:\n• Year might be too recent (2024 data may not be available yet)\n• Driver didn't participate\n• Check your spelling`);
+        setAnswer(`No data found for ${driver} at ${specificGP} GP ${year}.`);
       }
     } catch (err) {
       setAnswer(`Error: ${err.message}`);
@@ -129,6 +136,49 @@ function App() {
       setLoading(false);
     }
   };
+
+  // Add this to your App component
+const askSeasonPerformance = async () => {
+  if (!question) {
+    setAnswer("Please enter a question first!");
+    return;
+  }
+  
+  setLoading(true);
+  setAnswer("Loading season data...");
+  setShowChart(false);
+  
+  const driver = parseDriverFromQuestion(question) || "VER";
+  const year = parseYearFromQuestion(question) || 2024;
+  
+  try {
+    const url = `http://localhost:8000/driver-season-performance?year=${year}&driver=${driver}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    
+    if (data.error) {
+      setAnswer(`Error: ${data.error}`);
+    } else if (data.races && data.races.length > 0) {
+      setAnswer(
+        `🏎️ ${driver} Performance in ${year} Season:\n\n` +
+        `• Races Analyzed: ${data.races.length}\n` +
+        `• Best Lap: ${data.best_lap_time_formatted || 'N/A'} at ${data.best_lap_gp || 'N/A'}\n` +
+        `• Average Lap Time: ${data.avg_lap_time ? data.avg_lap_time.toFixed(3) : 'N/A'} seconds\n` +
+        `• Total Fastest Laps Set: ${data.fastest_laps}\n\n` +
+        `📊 Race-by-Race Fastest Laps:\n` +
+        data.races.map(r => `  • ${r.gp}: ${r.fastest_lap} (Lap ${r.lap_number}, ${r.compound} tires)`).join('\n')
+      );
+      setChartData({ driver, year, gp: "All Races" });
+      setShowChart(true);
+    } else {
+      setAnswer(`No data found for ${driver} in ${year}. Make sure the season has been cached.`);
+    }
+  } catch (err) {
+    setAnswer(`Error: ${err.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const askGeneral = async () => {
     if (!question) {
@@ -143,17 +193,42 @@ function App() {
       const res = await fetch(url);
       const data = await res.json();
       setAnswer(data.answer || JSON.stringify(data, null, 2));
-
-      // Check if question is about lap times and show chart
+      
+      // Check if response might benefit from chart data
       const lowerQuestion = question.toLowerCase();
       if ((lowerQuestion.includes("fastest lap") || lowerQuestion.includes("lap time")) && 
           (lowerQuestion.includes("ver") || lowerQuestion.includes("max"))) {
         const driver = parseDriverFromQuestion(question) || "VER";
-        const year = parseYearFromQuestion(question) || 2023;
-        const gp = parseGPFromQuestion(question);
+        const year = parseYearFromQuestion(question);
+        const gp = parseGPFromQuestion(question) || "Miami";
         setChartData({ driver, year, gp });
         setShowChart(true);
       }
+    } catch (err) {
+      setAnswer(`Error: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const askStrategy = async () => {
+    if (!question) {
+      setAnswer("Please enter a question first!");
+      return;
+    }
+    setLoading(true);
+    setAnswer("Loading...");
+    setShowChart(false);
+    
+    const driver = parseDriverFromQuestion(question) || "VER";
+    const year = parseYearFromQuestion(question);
+    const gp = parseGPFromQuestion(question) || "Miami";
+    
+    try {
+      const url = `http://localhost:8000/strategy?year=${year}&gp=${gp}&driver=${driver}&question=${encodeURIComponent(question)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      setAnswer(data.response || JSON.stringify(data, null, 2));
     } catch (err) {
       setAnswer(`Error: ${err.message}`);
     } finally {
@@ -169,35 +244,23 @@ function App() {
           type="text"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          placeholder="Ask about F1... Examples:
-• 'Who was fastest in 2024?'
-• 'What was Verstappen's fastest lap in Miami 2024?'
-• 'Show me Hamilton's lap times at Monaco 2023'
-• 'Compare Verstappen and Norris lap times'"
+          placeholder="Examples:
+• Who was fastest in 2024 overall?
+• What was Verstappen's fastest lap at Monaco 2024?
+• Best driver of 2024 season?
+• Compare Hamilton and Verstappen 2024"
           style={{ width: "600px", padding: "10px", fontSize: "16px" }}
           onKeyPress={(e) => e.key === 'Enter' && askGeneral()}
         />
       </div>
       <div style={{ marginTop: "10px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
-        <button 
-          onClick={askStrategy} 
-          disabled={loading}
-          style={{ padding: "10px 20px", cursor: "pointer" }}
-        >
+        <button onClick={askStrategy} disabled={loading} style={{ padding: "10px 20px", cursor: "pointer" }}>
           Ask Strategy
         </button>
-        <button 
-          onClick={askFastestLap} 
-          disabled={loading}
-          style={{ padding: "10px 20px", cursor: "pointer" }}
-        >
+        <button onClick={askFastestLap} disabled={loading} style={{ padding: "10px 20px", cursor: "pointer" }}>
           Get Fastest Lap
         </button>
-        <button 
-          onClick={askGeneral} 
-          disabled={loading}
-          style={{ padding: "10px 20px", cursor: "pointer", backgroundColor: "#4CAF50", color: "white" }}
-        >
+        <button onClick={askGeneral} disabled={loading} style={{ padding: "10px 20px", cursor: "pointer", backgroundColor: "#4CAF50", color: "white" }}>
           Ask General
         </button>
       </div>
@@ -219,7 +282,6 @@ function App() {
         </pre>
       </div>
 
-      {/* Chart appears when backend says so or for lap time queries */}
       {showChart && (
         <div style={{ marginTop: "40px" }}>
           <h3>📊 Lap Time Visualization</h3>
@@ -231,14 +293,13 @@ function App() {
         </div>
       )}
 
-      {/* Tips for users */}
       <div style={{ marginTop: "30px", padding: "15px", backgroundColor: "#e3f2fd", borderRadius: "5px" }}>
-        <h4>💡 Tips:</h4>
+        <h4>💡 For Season-Wide Questions (like "fastest in 2024"):</h4>
         <ul style={{ margin: "5px 0" }}>
-          <li><strong>"Who was fastest in 2024?"</strong> - Use <strong>Ask General</strong> button</li>
-          <li><strong>"What was Verstappen's fastest lap?"</strong> - Use <strong>Get Fastest Lap</strong> button</li>
-          <li><strong>"Compare drivers"</strong> - Use <strong>Ask General</strong> button</li>
-          <li>For 2024 data, note that some information may be limited until the season progresses</li>
+          <li>✅ <strong>Use the "Ask General" (green) button</strong> - This uses the AI model's knowledge</li>
+          <li>✅ The "Get Fastest Lap" button is for specific race queries</li>
+          <li>✅ Example: "Who was the fastest driver overall in 2024?" → Use Ask General</li>
+          <li>✅ Example: "Verstappen's fastest lap at Monaco 2024" → Use Get Fastest Lap</li>
         </ul>
       </div>
     </div>
