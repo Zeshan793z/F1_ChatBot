@@ -6,8 +6,21 @@ from typing import Optional
 from .agents.data_agent import get_driver_fastest_lap, get_season_fastest_laps, get_season_driver_performance
 from .agents.strategy_agent import explain_strategy
 from .agents.chat_agent import chat
+from .agents.rag_agent import F1RAGAgent
 
 app = FastAPI(title="F1 Chatbot API")
+
+# Initialize RAG agent
+rag_agent = None
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize RAG agent on startup"""
+    global rag_agent
+    print("🚀 Initializing F1 RAG Agent...")
+    rag_agent = F1RAGAgent()
+    rag_agent.initialize_knowledge_base()
+    print("✅ F1 RAG Agent ready!")
 
 # Allow CORS for frontend development
 app.add_middleware(
@@ -23,13 +36,15 @@ async def root():
     return {
         "message": "F1 Chatbot API is running",
         "status": "healthy",
+        "rag_enabled": rag_agent is not None,
         "endpoints": [
             "/fastest-lap?year=2023&gp=Miami&driver=VER",
             "/season-fastest-laps?year=2024&driver=VER",
             "/driver-season-performance?year=2024&driver=VER",
             "/multiple-seasons?years=2023,2024&driver=VER",
             "/strategy?year=2023&gp=Miami&driver=VER&question=...",
-            "/chat?question=..."
+            "/chat?question=... (now with RAG!)",
+            "/chat/legacy?question=... (original without RAG)"
         ]
     }
 
@@ -110,9 +125,41 @@ def strategy(year: int, gp: str, driver: str, question: str):
 
 @app.get("/chat")
 def chat_endpoint(question: str):
-    """General F1 chat endpoint"""
+    """General F1 chat endpoint with RAG (Intelligent, F1-focused)"""
+    if rag_agent is None:
+        return {
+            "question": question, 
+            "answer": "RAG agent not initialized yet. Please try again in a moment.",
+            "mode": "error"
+        }
+    
+    answer = rag_agent.chat(question)
+    return {
+        "question": question, 
+        "answer": answer,
+        "mode": "rag"
+    }
+
+@app.get("/chat/legacy")
+def chat_legacy_endpoint(question: str):
+    """Legacy chat endpoint without RAG (original behavior)"""
     answer = chat(question)
-    return {"question": question, "answer": answer}
+    return {
+        "question": question, 
+        "answer": answer,
+        "mode": "legacy"
+    }
+
+@app.get("/chat/health")
+def chat_health():
+    """Check RAG agent status"""
+    if rag_agent is None:
+        return {"status": "not_initialized", "rag_enabled": False}
+    return {
+        "status": "ready", 
+        "rag_enabled": True,
+        "knowledge_base_loaded": rag_agent.is_initialized
+    }
 
 if __name__ == "__main__":
     import uvicorn
