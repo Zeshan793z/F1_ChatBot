@@ -2,6 +2,7 @@ from langchain_community.llms import GPT4All
 from pathlib import Path
 import warnings
 import re
+import json
 from typing import List, Tuple, Optional
 from collections import Counter
 
@@ -20,10 +21,38 @@ class F1RAGAgent:
         self.knowledge_base = []
         self.winners_cache = {}  # Cache for winners by year
         
-    def initialize_knowledge_base(self):
-        """Initialize F1 knowledge base from FastF1 data - prioritizing latest seasons"""
-        print("📚 Building F1 Knowledge Base from your FastF1 cache...")
+        # Path to cache file
+        self.cache_file = Path(__file__).parent.parent.parent / "data" / "f1_knowledge_cache.json"
         
+    def initialize_knowledge_base(self, force_reload: bool = False):
+        """Initialize F1 knowledge base - loads from cache if available"""
+        
+        # Try to load from cache file first
+        if not force_reload and self.cache_file.exists():
+            print(f"📚 Loading F1 knowledge base from cache: {self.cache_file}")
+            try:
+                with open(self.cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                    self.knowledge_base = cache_data.get('knowledge_base', [])
+                    # Convert winners cache back from JSON (keys are strings)
+                    self.winners_cache = {}
+                    for year, winners in cache_data.get('winners_cache', {}).items():
+                        self.winners_cache[int(year)] = winners
+                    self.is_initialized = True
+                    print(f"✅ Loaded {len(self.knowledge_base)} documents from cache")
+                    return
+            except Exception as e:
+                print(f"⚠️ Could not load cache: {e}")
+        
+        # If cache doesn't exist or force_reload, build from FastF1
+        print("📚 Building F1 Knowledge Base from FastF1 cache...")
+        self._build_from_fastf1()
+        
+        # Save to cache for next time
+        self._save_to_cache()
+    
+    def _build_from_fastf1(self):
+        """Build knowledge base from FastF1 data (slow - only runs once)"""
         try:
             import fastf1
             
@@ -115,6 +144,41 @@ class F1RAGAgent:
             print(f"⚠️ Could not load FastF1 data: {e}")
             self._load_fallback_knowledge()
             self.is_initialized = True
+    
+    def _save_to_cache(self):
+        """Save knowledge base to cache file"""
+        try:
+            self.cache_file.parent.mkdir(parents=True, exist_ok=True)
+            cache_data = {
+                'knowledge_base': self.knowledge_base,
+                'winners_cache': {str(year): winners for year, winners in self.winners_cache.items()}
+            }
+            with open(self.cache_file, 'w', encoding='utf-8') as f:
+                json.dump(cache_data, f, indent=2, ensure_ascii=False)
+            print(f"💾 Saved {len(self.knowledge_base)} documents to cache: {self.cache_file}")
+        except Exception as e:
+            print(f"⚠️ Could not save cache: {e}")
+    
+    def _load_fallback_knowledge(self):
+        """Fallback knowledge base with essential F1 facts"""
+        self.knowledge_base = [
+            "[2026] Current F1 World Champion: TBD",
+            "[2025] F1 World Champion: Max Verstappen (Red Bull Racing)",
+            "[2024] F1 World Champion: Max Verstappen (Red Bull Racing)",
+            "[2023] F1 World Champion: Max Verstappen (Red Bull Racing)",
+            "F1 champions: 2021-2025 Max Verstappen, 2020 Lewis Hamilton, 2019 Lewis Hamilton",
+            "Most constructors titles: Ferrari (16), Williams (9), McLaren (8), Mercedes (8)",
+            "Most wins: Lewis Hamilton (105), Michael Schumacher (91), Sebastian Vettel (53)",
+            "DRS: Drag Reduction System, opens rear wing to aid overtaking",
+            "Pirelli tire compounds: C1 (hardest) to C5 (softest)"
+        ]
+        print(f"✅ Loaded {len(self.knowledge_base)} fallback F1 documents")
+    
+    def reload_knowledge_base(self):
+        """Force reload from FastF1 (useful when new race data is available)"""
+        print("🔄 Force reloading knowledge base from FastF1...")
+        self._build_from_fastf1()
+        self._save_to_cache()
     
     def get_latest_champion(self, specific_year: int = None) -> Optional[str]:
         """Get the championship leader for a specific year or latest year"""
@@ -251,16 +315,16 @@ class F1RAGAgent:
             # STRICT prompt - no extra text, no follow-up questions
             prompt = f"""Answer the question with ONLY the driver name or short fact. DO NOT ask questions. DO NOT add extra Q&A. STOP after one sentence.
 
-    DATA: {context}
+DATA: {context}
 
-    QUESTION: {question}
-    ANSWER:"""
+QUESTION: {question}
+ANSWER:"""
         else:
             # Ultra-strict prompt for no context
             prompt = f"""Answer with ONE word or short phrase only. NO extra text. NO questions.
 
-    QUESTION: {question}
-    ANSWER:"""
+QUESTION: {question}
+ANSWER:"""
         
         try:
             response = self.llm.invoke(prompt)

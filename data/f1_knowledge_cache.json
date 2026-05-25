@@ -1,0 +1,543 @@
+{
+  "knowledge_base": [
+    "[2026] Australian Grand Prix WINNER: RUS (George Russell) - Mercedes | FASTEST LAP: VER - 82.091s",
+    "[2026] Chinese Grand Prix WINNER: ANT (Kimi Antonelli) - Mercedes | FASTEST LAP: ANT - 95.275s",
+    "[2026] Japanese Grand Prix WINNER: ANT (Kimi Antonelli) - Mercedes | FASTEST LAP: ANT - 92.432s",
+    "[2026] Miami Grand Prix WINNER: ANT (Kimi Antonelli) - Mercedes | FASTEST LAP: NOR - 91.869s",
+    "[2026] Canadian Grand Prix WINNER: ANT (Kimi Antonelli) - Mercedes | FASTEST LAP: ANT - 74.210s",
+    "[2026] SEASON LEADER: Kimi Antonelli (ANT) with 4 wins",
+    "[2025] Australian Grand Prix WINNER: NOR (Lando Norris) - McLaren | FASTEST LAP: NOR - 82.167s",
+    "[2025] Chinese Grand Prix WINNER: PIA (Oscar Piastri) - McLaren | FASTEST LAP: HAM - 95.069s",
+    "[2025] Japanese Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: ANT - 90.965s",
+    "[2025] Bahrain Grand Prix WINNER: PIA (Oscar Piastri) - McLaren | FASTEST LAP: PIA - 95.140s",
+    "[2025] Saudi Arabian Grand Prix WINNER: PIA (Oscar Piastri) - McLaren | FASTEST LAP: NOR - 91.778s",
+    "[2025] Miami Grand Prix WINNER: PIA (Oscar Piastri) - McLaren | FASTEST LAP: NOR - 89.746s",
+    "[2025] Emilia Romagna Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 77.988s",
+    "[2025] Monaco Grand Prix WINNER: NOR (Lando Norris) - McLaren | FASTEST LAP: NOR - 73.221s",
+    "[2025] Spanish Grand Prix WINNER: PIA (Oscar Piastri) - McLaren | FASTEST LAP: PIA - 75.743s",
+    "[2025] Canadian Grand Prix WINNER: RUS (George Russell) - Mercedes | FASTEST LAP: RUS - 74.119s",
+    "[2025] Austrian Grand Prix WINNER: NOR (Lando Norris) - McLaren | FASTEST LAP: PIA - 67.924s",
+    "[2025] British Grand Prix WINNER: NOR (Lando Norris) - McLaren | FASTEST LAP: PIA - 89.337s",
+    "[2025] Belgian Grand Prix WINNER: PIA (Oscar Piastri) - McLaren | FASTEST LAP: ANT - 104.861s",
+    "[2025] Hungarian Grand Prix WINNER: NOR (Lando Norris) - McLaren | FASTEST LAP: RUS - 79.409s",
+    "[2025] Dutch Grand Prix WINNER: PIA (Oscar Piastri) - McLaren | FASTEST LAP: PIA - 72.271s",
+    "[2025] Italian Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: NOR - 80.901s",
+    "[2025] Azerbaijan Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 103.388s",
+    "[2025] Singapore Grand Prix WINNER: RUS (George Russell) - Mercedes | FASTEST LAP: HAM - 93.808s",
+    "[2025] United States Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: ANT - 97.577s",
+    "[2025] Mexico City Grand Prix WINNER: NOR (Lando Norris) - McLaren | FASTEST LAP: RUS - 80.052s",
+    "[2025] São Paulo Grand Prix WINNER: NOR (Lando Norris) - McLaren | FASTEST LAP: ALB - 72.400s",
+    "[2025] Las Vegas Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 93.365s",
+    "[2025] Qatar Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: PIA - 82.996s",
+    "[2025] Abu Dhabi Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: LEC - 86.725s",
+    "[2025] SEASON LEADER: Max Verstappen (VER) with 8 wins",
+    "[2024] Bahrain Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 92.608s",
+    "[2024] Saudi Arabian Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: LEC - 91.632s",
+    "[2024] Australian Grand Prix WINNER: SAI (Carlos Sainz) - Ferrari | FASTEST LAP: LEC - 79.813s",
+    "[2024] Japanese Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 93.706s",
+    "[2024] Chinese Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: ALO - 97.810s",
+    "[2024] Miami Grand Prix WINNER: NOR (Lando Norris) - McLaren | FASTEST LAP: PIA - 90.634s",
+    "[2024] Emilia Romagna Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: RUS - 78.589s",
+    "[2024] Monaco Grand Prix WINNER: LEC (Charles Leclerc) - Ferrari | FASTEST LAP: HAM - 74.165s",
+    "[2024] Canadian Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: HAM - 74.856s",
+    "[2024] Spanish Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: NOR - 77.115s",
+    "[2024] Austrian Grand Prix WINNER: RUS (George Russell) - Mercedes | FASTEST LAP: ALO - 67.694s",
+    "[2024] British Grand Prix WINNER: HAM (Lewis Hamilton) - Mercedes | FASTEST LAP: SAI - 88.293s",
+    "[2024] Hungarian Grand Prix WINNER: PIA (Oscar Piastri) - McLaren | FASTEST LAP: RUS - 80.305s",
+    "[2024] Belgian Grand Prix WINNER: HAM (Lewis Hamilton) - Mercedes | FASTEST LAP: PER - 104.701s",
+    "[2024] Dutch Grand Prix WINNER: NOR (Lando Norris) - McLaren | FASTEST LAP: NOR - 73.817s",
+    "[2024] Italian Grand Prix WINNER: LEC (Charles Leclerc) - Ferrari | FASTEST LAP: NOR - 81.432s",
+    "[2024] Azerbaijan Grand Prix WINNER: PIA (Oscar Piastri) - McLaren | FASTEST LAP: NOR - 105.255s",
+    "[2024] Singapore Grand Prix WINNER: NOR (Lando Norris) - McLaren | FASTEST LAP: RIC - 94.486s",
+    "[2024] United States Grand Prix WINNER: LEC (Charles Leclerc) - Ferrari | FASTEST LAP: OCO - 97.330s",
+    "[2024] Mexico City Grand Prix WINNER: SAI (Carlos Sainz) - Ferrari | FASTEST LAP: LEC - 78.336s",
+    "[2024] São Paulo Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 80.472s",
+    "[2024] Las Vegas Grand Prix WINNER: RUS (George Russell) - Mercedes | FASTEST LAP: NOR - 94.876s",
+    "[2024] Qatar Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: NOR - 82.384s",
+    "[2024] Abu Dhabi Grand Prix WINNER: NOR (Lando Norris) - McLaren | FASTEST LAP: MAG - 85.637s",
+    "[2024] SEASON LEADER: Max Verstappen (VER) with 9 wins",
+    "[2023] Bahrain Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: ZHO - 93.996s",
+    "[2023] Saudi Arabian Grand Prix WINNER: PER (Sergio Perez) - Red Bull Racing | FASTEST LAP: VER - 91.906s",
+    "[2023] Australian Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: PER - 80.235s",
+    "[2023] Azerbaijan Grand Prix WINNER: PER (Sergio Perez) - Red Bull Racing | FASTEST LAP: RUS - 103.370s",
+    "[2023] Miami Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 89.708s",
+    "[2023] Monaco Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: HAM - 75.650s",
+    "[2023] Spanish Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 76.330s",
+    "[2023] Canadian Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: PER - 74.481s",
+    "[2023] Austrian Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 67.012s",
+    "[2023] British Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 90.275s",
+    "[2023] Hungarian Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 80.504s",
+    "[2023] Belgian Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: HAM - 107.305s",
+    "[2023] Dutch Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: ALO - 73.837s",
+    "[2023] Italian Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: PIA - 85.072s",
+    "[2023] Singapore Grand Prix WINNER: SAI (Carlos Sainz) - Ferrari | FASTEST LAP: HAM - 95.867s",
+    "[2023] Japanese Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 94.183s",
+    "[2023] Qatar Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 84.319s",
+    "[2023] United States Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: TSU - 98.139s",
+    "[2023] Mexico City Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: HAM - 81.334s",
+    "[2023] São Paulo Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: NOR - 72.486s",
+    "[2023] Las Vegas Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: PIA - 95.490s",
+    "[2023] Abu Dhabi Grand Prix WINNER: VER (Max Verstappen) - Red Bull Racing | FASTEST LAP: VER - 86.993s",
+    "[2023] SEASON LEADER: Max Verstappen (VER) with 19 wins"
+  ],
+  "winners_cache": {
+    "2026": [
+      {
+        "gp": "Australian Grand Prix",
+        "driver_code": "RUS",
+        "driver_name": "George Russell",
+        "team": "Mercedes"
+      },
+      {
+        "gp": "Chinese Grand Prix",
+        "driver_code": "ANT",
+        "driver_name": "Kimi Antonelli",
+        "team": "Mercedes"
+      },
+      {
+        "gp": "Japanese Grand Prix",
+        "driver_code": "ANT",
+        "driver_name": "Kimi Antonelli",
+        "team": "Mercedes"
+      },
+      {
+        "gp": "Miami Grand Prix",
+        "driver_code": "ANT",
+        "driver_name": "Kimi Antonelli",
+        "team": "Mercedes"
+      },
+      {
+        "gp": "Canadian Grand Prix",
+        "driver_code": "ANT",
+        "driver_name": "Kimi Antonelli",
+        "team": "Mercedes"
+      }
+    ],
+    "2025": [
+      {
+        "gp": "Australian Grand Prix",
+        "driver_code": "NOR",
+        "driver_name": "Lando Norris",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Chinese Grand Prix",
+        "driver_code": "PIA",
+        "driver_name": "Oscar Piastri",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Japanese Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Bahrain Grand Prix",
+        "driver_code": "PIA",
+        "driver_name": "Oscar Piastri",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Saudi Arabian Grand Prix",
+        "driver_code": "PIA",
+        "driver_name": "Oscar Piastri",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Miami Grand Prix",
+        "driver_code": "PIA",
+        "driver_name": "Oscar Piastri",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Emilia Romagna Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Monaco Grand Prix",
+        "driver_code": "NOR",
+        "driver_name": "Lando Norris",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Spanish Grand Prix",
+        "driver_code": "PIA",
+        "driver_name": "Oscar Piastri",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Canadian Grand Prix",
+        "driver_code": "RUS",
+        "driver_name": "George Russell",
+        "team": "Mercedes"
+      },
+      {
+        "gp": "Austrian Grand Prix",
+        "driver_code": "NOR",
+        "driver_name": "Lando Norris",
+        "team": "McLaren"
+      },
+      {
+        "gp": "British Grand Prix",
+        "driver_code": "NOR",
+        "driver_name": "Lando Norris",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Belgian Grand Prix",
+        "driver_code": "PIA",
+        "driver_name": "Oscar Piastri",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Hungarian Grand Prix",
+        "driver_code": "NOR",
+        "driver_name": "Lando Norris",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Dutch Grand Prix",
+        "driver_code": "PIA",
+        "driver_name": "Oscar Piastri",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Italian Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Azerbaijan Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Singapore Grand Prix",
+        "driver_code": "RUS",
+        "driver_name": "George Russell",
+        "team": "Mercedes"
+      },
+      {
+        "gp": "United States Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Mexico City Grand Prix",
+        "driver_code": "NOR",
+        "driver_name": "Lando Norris",
+        "team": "McLaren"
+      },
+      {
+        "gp": "São Paulo Grand Prix",
+        "driver_code": "NOR",
+        "driver_name": "Lando Norris",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Las Vegas Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Qatar Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Abu Dhabi Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      }
+    ],
+    "2024": [
+      {
+        "gp": "Bahrain Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Saudi Arabian Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Australian Grand Prix",
+        "driver_code": "SAI",
+        "driver_name": "Carlos Sainz",
+        "team": "Ferrari"
+      },
+      {
+        "gp": "Japanese Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Chinese Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Miami Grand Prix",
+        "driver_code": "NOR",
+        "driver_name": "Lando Norris",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Emilia Romagna Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Monaco Grand Prix",
+        "driver_code": "LEC",
+        "driver_name": "Charles Leclerc",
+        "team": "Ferrari"
+      },
+      {
+        "gp": "Canadian Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Spanish Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Austrian Grand Prix",
+        "driver_code": "RUS",
+        "driver_name": "George Russell",
+        "team": "Mercedes"
+      },
+      {
+        "gp": "British Grand Prix",
+        "driver_code": "HAM",
+        "driver_name": "Lewis Hamilton",
+        "team": "Mercedes"
+      },
+      {
+        "gp": "Hungarian Grand Prix",
+        "driver_code": "PIA",
+        "driver_name": "Oscar Piastri",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Belgian Grand Prix",
+        "driver_code": "HAM",
+        "driver_name": "Lewis Hamilton",
+        "team": "Mercedes"
+      },
+      {
+        "gp": "Dutch Grand Prix",
+        "driver_code": "NOR",
+        "driver_name": "Lando Norris",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Italian Grand Prix",
+        "driver_code": "LEC",
+        "driver_name": "Charles Leclerc",
+        "team": "Ferrari"
+      },
+      {
+        "gp": "Azerbaijan Grand Prix",
+        "driver_code": "PIA",
+        "driver_name": "Oscar Piastri",
+        "team": "McLaren"
+      },
+      {
+        "gp": "Singapore Grand Prix",
+        "driver_code": "NOR",
+        "driver_name": "Lando Norris",
+        "team": "McLaren"
+      },
+      {
+        "gp": "United States Grand Prix",
+        "driver_code": "LEC",
+        "driver_name": "Charles Leclerc",
+        "team": "Ferrari"
+      },
+      {
+        "gp": "Mexico City Grand Prix",
+        "driver_code": "SAI",
+        "driver_name": "Carlos Sainz",
+        "team": "Ferrari"
+      },
+      {
+        "gp": "São Paulo Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Las Vegas Grand Prix",
+        "driver_code": "RUS",
+        "driver_name": "George Russell",
+        "team": "Mercedes"
+      },
+      {
+        "gp": "Qatar Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Abu Dhabi Grand Prix",
+        "driver_code": "NOR",
+        "driver_name": "Lando Norris",
+        "team": "McLaren"
+      }
+    ],
+    "2023": [
+      {
+        "gp": "Bahrain Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Saudi Arabian Grand Prix",
+        "driver_code": "PER",
+        "driver_name": "Sergio Perez",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Australian Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Azerbaijan Grand Prix",
+        "driver_code": "PER",
+        "driver_name": "Sergio Perez",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Miami Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Monaco Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Spanish Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Canadian Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Austrian Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "British Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Hungarian Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Belgian Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Dutch Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Italian Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Singapore Grand Prix",
+        "driver_code": "SAI",
+        "driver_name": "Carlos Sainz",
+        "team": "Ferrari"
+      },
+      {
+        "gp": "Japanese Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Qatar Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "United States Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Mexico City Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "São Paulo Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Las Vegas Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      },
+      {
+        "gp": "Abu Dhabi Grand Prix",
+        "driver_code": "VER",
+        "driver_name": "Max Verstappen",
+        "team": "Red Bull Racing"
+      }
+    ]
+  }
+}

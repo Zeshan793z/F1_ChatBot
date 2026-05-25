@@ -13,7 +13,7 @@ class F1KnowledgeBase:
         """Extract detailed F1 session data as text"""
         try:
             session = fastf1.get_session(year, gp, "R")
-            session.load(telemetry=False, laps=True, weather=False)
+            session.load(telemetry=True, laps=True, weather=True)
             
             # Collect race information
             race_info = {

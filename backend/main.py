@@ -19,7 +19,8 @@ async def startup_event():
     global rag_agent
     print("🚀 Initializing F1 RAG Agent...")
     rag_agent = F1RAGAgent()
-    rag_agent.initialize_knowledge_base()
+    # force_reload=False means it will load from cache if available
+    rag_agent.initialize_knowledge_base(force_reload=False)
     print("✅ F1 RAG Agent ready!")
 
 # Allow CORS for frontend development
