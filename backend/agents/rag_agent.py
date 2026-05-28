@@ -52,22 +52,23 @@ class F1RAGAgent:
         self._save_to_cache()
     
     def _build_from_fastf1(self):
-        """Build knowledge base from FastF1 data (slow - only runs once)"""
+        """Build knowledge base from FastF1 - extracts ALL data (tires, weather, telemetry, pit stops)"""
         try:
             import fastf1
+            import pandas as pd
+            from datetime import datetime
             
             cache_dir = Path(__file__).parent.parent.parent / "data" / "fastf1_cache"
             fastf1.Cache.enable_cache(str(cache_dir))
             
-            # Process years in REVERSE order (2026 first!)
             years = [2026, 2025, 2024, 2023]
             knowledge_texts = []
+            current_date = datetime.now()
             
             for year in years:
                 print(f"\n📅 Processing {year} season...")
                 try:
                     schedule = fastf1.get_event_schedule(year)
-                    # Get race sessions only
                     races = schedule[schedule['Session5'] == 'Race'] if 'Session5' in schedule.columns else schedule
                     print(f"  Found {len(races)} races")
                     
@@ -76,9 +77,19 @@ class F1RAGAgent:
                     for idx, race in races.iterrows():
                         gp_name = race['EventName']
                         
+                        # Skip future races
+                        race_date = race['EventDate']
+                        if isinstance(race_date, pd.Timestamp):
+                            race_date = race_date.to_pydatetime()
+                        
+                        if race_date > current_date:
+                            print(f"    ⏭️ Skipping future race: {gp_name}")
+                            continue
+                        
                         try:
+                            # Load with telemetry=True and weather=True
                             session = fastf1.get_session(year, gp_name, "R")
-                            session.load(telemetry=False, laps=True, weather=False)
+                            session.load(telemetry=True, laps=True, weather=True)
                             
                             results = session.results
                             if not results.empty:
@@ -89,7 +100,7 @@ class F1RAGAgent:
                                 
                                 year_winners.append(winner_code)
                                 
-                                # Store in cache for quick lookup
+                                # Store in winners_cache (preserves existing structure)
                                 if year not in self.winners_cache:
                                     self.winners_cache[year] = []
                                 self.winners_cache[year].append({
@@ -99,30 +110,78 @@ class F1RAGAgent:
                                     'team': winner_team
                                 })
                                 
-                                # Add to knowledge base
+                                # Build text - PRESERVES existing format
                                 text = f"[{year}] {gp_name} WINNER: {winner_code} ({winner_name}) - {winner_team}"
                                 
-                                # Add fastest lap if available
+                                # Get fastest lap with TIRE COMPOUND
                                 fastest = session.laps.pick_fastest()
-                                if not fastest.empty:
-                                    text += f" | FASTEST LAP: {fastest['Driver']} - {fastest['LapTime'].total_seconds():.3f}s"
+                                if fastest is not None and not fastest.empty:
+                                    fastest_time = fastest['LapTime'].total_seconds()
+                                    fastest_driver = fastest['Driver']
+                                    text += f" | FASTEST LAP: {fastest_driver} - {fastest_time:.3f}s"
+                                    
+                                    # ADD TIRE COMPOUND (new)
+                                    if 'Compound' in fastest.index:
+                                        tire = fastest['Compound']
+                                        if pd.notna(tire):
+                                            text += f" | TIRE: {tire}"
+                                
+                                # ADD WEATHER DATA (new)
+                                if hasattr(session, 'weather_data') and session.weather_data is not None:
+                                    weather = session.weather_data
+                                    if not weather.empty:
+                                        weather_parts = []
+                                        if 'AirTemp' in weather.columns:
+                                            air_temp = weather['AirTemp'].mean()
+                                            if pd.notna(air_temp):
+                                                weather_parts.append(f"Air:{air_temp:.0f}°C")
+                                        if 'TrackTemp' in weather.columns:
+                                            track_temp = weather['TrackTemp'].mean()
+                                            if pd.notna(track_temp):
+                                                weather_parts.append(f"Track:{track_temp:.0f}°C")
+                                        if 'Humidity' in weather.columns:
+                                            humidity = weather['Humidity'].mean()
+                                            if pd.notna(humidity):
+                                                weather_parts.append(f"Humidity:{humidity:.0f}%")
+                                        if weather_parts:
+                                            text += f" | WEATHER: {' | '.join(weather_parts)}"
+                                
+                                # ADD PIT STOP SUMMARY (new)
+                                if hasattr(session, 'laps') and session.laps is not None:
+                                    pit_stops = session.laps.dropna(subset=['PitInTime'])
+                                    if not pit_stops.empty:
+                                        pit_counts = pit_stops['Driver'].value_counts()
+                                        pit_summary = [f"{d}:{c}" for d, c in pit_counts.head(3).items()]
+                                        if pit_summary:
+                                            text += f" | PIT STOPS: {', '.join(pit_summary)}"
+                                
+                                # ADD SECTOR TIMES for fastest lap (new)
+                                if fastest is not None and not fastest.empty:
+                                    sector_parts = []
+                                    if 'Sector1Time' in fastest.index and pd.notna(fastest['Sector1Time']):
+                                        sector_parts.append(f"S1:{fastest['Sector1Time'].total_seconds():.3f}")
+                                    if 'Sector2Time' in fastest.index and pd.notna(fastest['Sector2Time']):
+                                        sector_parts.append(f"S2:{fastest['Sector2Time'].total_seconds():.3f}")
+                                    if 'Sector3Time' in fastest.index and pd.notna(fastest['Sector3Time']):
+                                        sector_parts.append(f"S3:{fastest['Sector3Time'].total_seconds():.3f}")
+                                    if sector_parts:
+                                        text += f" | SECTORS: {' | '.join(sector_parts)}"
                                 
                                 knowledge_texts.append(text)
-                                print(f"    ✅ {gp_name}: {winner_name} ({winner_code})")
+                                print(f"    ✅ {gp_name}: {winner_name} ({winner_code}) - TIRE: {tire if 'tire' in locals() else 'N/A'}")
                                 
                         except Exception as e:
                             if "no data" not in str(e).lower() and "404" not in str(e):
-                                print(f"    ⚠️ Could not load {gp_name}: {str(e)[:50]}")
+                                print(f"    ⚠️ Could not load {gp_name}: {str(e)[:80]}")
                             continue
                     
-                    # Calculate championship leader for this year
+                    # Calculate championship leader (preserves existing functionality)
                     if year_winners:
                         win_counts = Counter(year_winners)
                         leader = win_counts.most_common(1)[0]
                         leader_code = leader[0]
                         leader_wins = leader[1]
                         
-                        # Find the full name of the leader
                         leader_name = leader_code
                         for winner in self.winners_cache.get(year, []):
                             if winner['driver_code'] == leader_code:
@@ -131,13 +190,14 @@ class F1RAGAgent:
                         
                         knowledge_texts.append(f"[{year}] SEASON LEADER: {leader_name} ({leader_code}) with {leader_wins} wins")
                         print(f"  🏆 {year} Season Leader: {leader_name} ({leader_code}) - {leader_wins} wins")
-                    
+                        
                 except Exception as e:
                     print(f"  ❌ Error loading {year}: {e}")
                     continue
             
             self.knowledge_base = knowledge_texts
             self.is_initialized = True
+            self._save_to_cache()
             print(f"\n✅ Total: {len(self.knowledge_base)} F1 documents loaded")
             
         except Exception as e:
@@ -223,16 +283,45 @@ class F1RAGAgent:
         return None
     
     def search_knowledge(self, question: str, k: int = 3) -> List[Tuple[str, float]]:
-        """Search with recency bias"""
+        """Smart search that finds the most relevant documents"""
         question_lower = question.lower()
         scored_docs = []
         
+        # Extract key terms from question (ignore common words)
+        stop_words = ['what', 'when', 'where', 'which', 'how', 'the', 'and', 'for', 'with', 'was', 'were', 'did']
+        key_terms = []
+        for word in question_lower.split():
+            if len(word) > 2 and word not in stop_words:
+                key_terms.append(word)
+        
+        # Year weights for recency
         year_weights = {2026: 150, 2025: 100, 2024: 50, 2023: 25}
         
         for doc in self.knowledge_base:
             doc_lower = doc.lower()
+            score = 0
             
-            # Extract year
+            # Score based on key terms
+            for term in key_terms:
+                if term in doc_lower:
+                    score += 3
+            
+            # Score based on year match
+            year_match = re.search(r'202[3-6]', question)
+            if year_match:
+                if f'[{year_match.group(0)}]' in doc:
+                    score += 10
+            
+            # Score based on GP match
+            gp_terms = ['australian', 'chinese', 'japanese', 'miami', 'canadian', 
+                        'monaco', 'british', 'austrian', 'belgian', 'italian',
+                        'singapore', 'abu dhabi', 'bahrain', 'saudi', 'azerbaijan',
+                        'spanish', 'hungarian', 'dutch', 'mexico', 'brazil', 'qatar']
+            for gp in gp_terms:
+                if gp in question_lower and gp in doc_lower:
+                    score += 8
+            
+            # Extract year for recency bonus
             year = None
             if doc.startswith('[2026]'):
                 year = 2026
@@ -243,11 +332,8 @@ class F1RAGAgent:
             elif doc.startswith('[2023]'):
                 year = 2023
             
-            # Relevance scoring
-            relevance = sum(2 for word in question_lower.split() if len(word) > 3 and word in doc_lower)
             recency_bonus = year_weights.get(year, 0) if year else 0
-            
-            total_score = relevance + recency_bonus
+            total_score = score + recency_bonus
             
             if total_score > 0:
                 scored_docs.append((doc, total_score))
@@ -256,104 +342,82 @@ class F1RAGAgent:
         return scored_docs[:k]
     
     def is_f1_question(self, question: str) -> bool:
-        """Check if question is F1-related"""
-        f1_keywords = [
-            'formula', 'f1', 'grand prix', 'ferrari', 'mercedes', 'red bull',
-            'verstappen', 'hamilton', 'leclerc', 'norris', 'perez', 'sainz',
-            'antonelli', 'russell', 'piastri', 'alonso', 'vettel',
-            'pirelli', 'drs', 'qualifying', 'sprint', 'race', 'championship',
-            'monza', 'monaco', 'silverstone', 'spa', 'suzuka', 'miami',
-            'canada', 'australian', 'chinese', 'japanese'
-        ]
+        """Check if question is F1-related - more comprehensive matching"""
         question_lower = question.lower()
-        return any(keyword in question_lower for keyword in f1_keywords)
-    
+        
+        # Core F1 terms
+        f1_keywords = [
+            'formula', 'f1', 'grand prix', 'gp', 'ferrari', 'mercedes', 'red bull',
+            'verstappen', 'hamilton', 'leclerc', 'norris', 'perez', 'sainz',
+            'antonelli', 'russell', 'piastri', 'alonso', 'vettel', 'schumacher',
+            'pirelli', 'drs', 'ers', 'drag reduction', 'pit stop', 'qualifying',
+            'sprint', 'race', 'championship', 'constructor', 'driver', 'circuit',
+            'monza', 'monaco', 'silverstone', 'spa', 'suzuka', 'miami', 'vegas',
+            'canada', 'canadian', 'australia', 'australian', 'china', 'chinese',
+            'japan', 'japanese', 'britain', 'british', 'austria', 'austrian',
+            'belgium', 'belgian', 'italy', 'italian', 'singapore', 'abu dhabi',
+            'bahrain', 'saudi', 'azerbaijan', 'spain', 'spanish', 'hungary',
+            'hungarian', 'netherlands', 'dutch', 'mexico', 'mexican', 'brazil',
+            'brazilian', 'qatar', 'las vegas', 'cota', 'austin', 'imola',
+            'portimao', 'zandvoort', 'baku', 'istanbul', 'melbourne'
+        ]
+        
+        question_lower = question.lower()
+        
+        # Check for F1 keywords
+        if any(keyword in question_lower for keyword in f1_keywords):
+            return True
+        
+        # Check for year mentions with racing context
+        if re.search(r'202[3-6]', question) and any(word in question_lower for word in ['race', 'won', 'winner', 'champion', 'gp']):
+            return True
+        
+        # Check for driver names (common F1 drivers)
+        driver_names = [
+            'max', 'verstappen', 'lewis', 'hamilton', 'charles', 'leclerc',
+            'lando', 'norris', 'carlos', 'sainz', 'sergio', 'perez',
+            'george', 'russell', 'oscar', 'piastri', 'kimi', 'antonelli',
+            'fernando', 'alonso', 'sebastian', 'vettel', 'daniel', 'ricciardo'
+        ]
+        if any(name in question_lower for name in driver_names):
+            return True
+        
+        return False
     def chat(self, question: str) -> str:
-        """Answer F1 questions using cached race data - SINGLE ANSWER ONLY"""
+        """Answer ANY F1 question naturally - with full details from the data"""
         if not self.is_f1_question(question):
             return "I'm specialized in Formula 1. Please ask me about F1 racing! 🏎️"
         
-        question_lower = question.lower()
+        # Search for relevant documents
+        relevant_docs = self.search_knowledge(question, k=3)
         
-        # Extract year from question
-        year_match = re.search(r'202[3-6]', question)
-        specific_year = int(year_match.group(0)) if year_match else None
+        if not relevant_docs:
+            return "I don't have information about that in my F1 database."
         
-        # Check for specific race winners
-        gp_patterns = {
-            'australian': 'Australian',
-            'chinese': 'Chinese', 
-            'japanese': 'Japanese',
-            'miami': 'Miami',
-            'canadian': 'Canadian',
-            'monaco': 'Monaco',
-            'british': 'British',
-            'austrian': 'Austrian',
-            'belgian': 'Belgian',
-            'italian': 'Italian',
-            'singapore': 'Singapore',
-            'abu dhabi': 'Abu Dhabi'
-        }
+        context = "\n\n".join([doc for doc, _ in relevant_docs])
         
-        for gp_key, gp_name in gp_patterns.items():
-            if gp_key in question_lower and specific_year:
-                winner = self.get_race_winner(specific_year, gp_name)
-                if winner:
-                    return winner
-        
-        # Check for championship question
-        if 'champion' in question_lower or 'latest' in question_lower:
-            champion = self.get_latest_champion(specific_year)
-            if champion:
-                return champion
-        
-        # Fallback to LLM with STRICT single-answer prompt
-        relevant_docs = self.search_knowledge(question, k=2)
-        
-        if relevant_docs:
-            context = "\n".join([doc for doc, _ in relevant_docs])
-            # STRICT prompt - no extra text, no follow-up questions
-            prompt = f"""Answer the question with ONLY the driver name or short fact. DO NOT ask questions. DO NOT add extra Q&A. STOP after one sentence.
+        # More flexible prompt for "tell me about" questions
+        prompt = f"""Based ONLY on the F1 data below, answer the question naturally and conversationally.
 
-DATA: {context}
+    DATA: {context}
 
-QUESTION: {question}
-ANSWER:"""
-        else:
-            # Ultra-strict prompt for no context
-            prompt = f"""Answer with ONE word or short phrase only. NO extra text. NO questions.
+    QUESTION: {question}
 
-QUESTION: {question}
-ANSWER:"""
+    INSTRUCTIONS:
+    - Answer in 2-3 sentences
+    - Include key facts: winner, fastest lap, tire compound, weather
+    - Be conversational but factual
+
+    ANSWER:"""
         
         try:
             response = self.llm.invoke(prompt)
             
-            # Clean up response
+            # Clean up
             response = response.strip()
-            
-            # Remove any "ANSWER:" prefix
             response = re.sub(r'^ANSWER:\s*', '', response, flags=re.IGNORECASE)
-            response = re.sub(r'^A:\s*', '', response, flags=re.IGNORECASE)
-            
-            # CRITICAL: Remove anything after a question mark or "Q:"
-            if '?' in response:
-                response = response.split('?')[0]
-            if 'Q:' in response:
-                response = response.split('Q:')[0]
-            
-            # Take only the first sentence
-            sentences = re.split(r'[.!?]+', response)
-            if sentences:
-                response = sentences[0].strip()
-            
-            # Remove any remaining extra patterns
-            response = re.sub(r'\s+Q:.*$', '', response, flags=re.IGNORECASE)
-            response = re.sub(r'\s+Which.*$', '', response, flags=re.IGNORECASE)
-            
-            # Limit to 100 characters max
-            if len(response) > 100:
-                response = response[:100]
+            response = re.sub(r'<[^>]+>', '', response)
+            response = re.sub(r'\s+', ' ', response)
             
             return response if response else "I don't have that information."
             
