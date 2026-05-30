@@ -6,22 +6,20 @@ from typing import Optional
 from .agents.data_agent import get_driver_fastest_lap, get_season_fastest_laps, get_season_driver_performance
 from .agents.strategy_agent import explain_strategy
 from .agents.chat_agent import chat
-from .agents.rag_agent import F1RAGAgent
+from .agents.orchestrator import Orchestrator
 
 app = FastAPI(title="F1 Chatbot API")
 
-# Initialize RAG agent
-rag_agent = None
+# Initialize orchestrator
+orchestrator = None
 
 @app.on_event("startup")
 async def startup_event():
-    """Initialize RAG agent on startup"""
-    global rag_agent
-    print("🚀 Initializing F1 RAG Agent...")
-    rag_agent = F1RAGAgent()
-    # force_reload=False means it will load from cache if available
-    rag_agent.initialize_knowledge_base(force_reload=False)
-    print("✅ F1 RAG Agent ready!")
+    """Initialize Orchestrator on startup"""
+    global orchestrator
+    print("🚀 Initializing F1 Orchestrator...")
+    orchestrator = Orchestrator()
+    print("✅ F1 Orchestrator ready!")
 
 # Allow CORS for frontend development
 app.add_middleware(
@@ -124,21 +122,22 @@ def strategy(year: int, gp: str, driver: str, question: str):
     response = explain_strategy(data_str, question)
     return {"response": response}
 
+# Change the chat_endpoint function
 @app.get("/chat")
 def chat_endpoint(question: str):
-    """General F1 chat endpoint with RAG (Intelligent, F1-focused)"""
-    if rag_agent is None:
+    """General F1 chat endpoint with Multi-Agent Orchestration"""
+    if orchestrator is None:
         return {
             "question": question, 
-            "answer": "RAG agent not initialized yet. Please try again in a moment.",
+            "answer": "Orchestrator not initialized yet. Please try again in a moment.",
             "mode": "error"
         }
     
-    answer = rag_agent.chat(question)
+    answer = orchestrator.route(question)
     return {
         "question": question, 
         "answer": answer,
-        "mode": "rag"
+        "mode": "orchestrated"
     }
 
 @app.get("/chat/legacy")
