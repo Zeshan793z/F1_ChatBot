@@ -325,7 +325,104 @@ class F1RAGAgent:
         
         question_lower = question.lower()
         
-        # Special handling for last/latest race
+        # ========== IMPROVED HANDLING FOR "LAST WIN" QUESTIONS ==========
+        last_win_patterns = ['last win', 'last victory', 'last gp won', 'last race won', 'most recent win']
+        if any(pattern in question_lower for pattern in last_win_patterns):
+            # Map driver names to codes and full names (for better matching)
+            driver_map = {
+                'hamilton': ('Lewis Hamilton', 'HAM'),
+                'lewis': ('Lewis Hamilton', 'HAM'),
+                'verstappen': ('Max Verstappen', 'VER'),
+                'max': ('Max Verstappen', 'VER'),
+                'leclerc': ('Charles Leclerc', 'LEC'),
+                'charles': ('Charles Leclerc', 'LEC'),
+                'norris': ('Lando Norris', 'NOR'),
+                'lando': ('Lando Norris', 'NOR'),
+                'russell': ('George Russell', 'RUS'),
+                'george': ('George Russell', 'RUS'),
+                'piastri': ('Oscar Piastri', 'PIA'),
+                'oscar': ('Oscar Piastri', 'PIA'),
+                'sainz': ('Carlos Sainz', 'SAI'),
+                'carlos': ('Carlos Sainz', 'SAI'),
+                'perez': ('Sergio Perez', 'PER'),
+                'checo': ('Sergio Perez', 'PER'),
+                'alonso': ('Fernando Alonso', 'ALO'),
+                'fernando': ('Fernando Alonso', 'ALO'),
+                'antonelli': ('Kimi Antonelli', 'ANT'),
+                'kimi': ('Kimi Antonelli', 'ANT'),
+            }
+            
+            driver_full = None
+            driver_code = None
+            
+            for name_key, (full_name, code) in driver_map.items():
+                if name_key in question_lower:
+                    driver_full = full_name
+                    driver_code = code
+                    break
+            
+            if driver_full and driver_code:
+                # Collect all wins for this driver (using both code and name)
+                wins = []
+                for doc in self.knowledge_base:
+                    # Look for WINNER field with driver code OR driver name
+                    if f'WINNER: {driver_code}' in doc or f'({driver_full})' in doc:
+                        # Extract year and GP
+                        year_match = re.search(r'\[(20\d{2})\]', doc)
+                        gp_match = re.search(r'\]\s*([^|]+?)\s*\|', doc)
+                        team_match = re.search(r'-\s*([^-]+?)(?:\||$)', doc)
+                        
+                        if year_match and gp_match:
+                            year = int(year_match.group(1))
+                            gp = gp_match.group(1).strip()
+                            team = team_match.group(1).strip() if team_match else ""
+                            wins.append((year, gp, team))
+                
+                if wins:
+                    # Build a list of wins for the LLM to analyze chronologically
+                    wins_list = []
+                    for year, gp, team in wins:
+                        wins_list.append(f"- {gp} {year} ({team})")
+                    
+                    wins_text = "\n".join(wins_list)
+                    
+                    # Let the LLM determine the most recent win based on F1 calendar order
+                    prompt = f"""Based on the race data below, determine which was {driver_full}'s MOST RECENT (last) Formula 1 win.
+    Consider the actual chronological order of the F1 calendar (e.g., Bahrain is early in season, Abu Dhabi is late).
+
+    WINS BY {driver_full}:
+    {wins_text}
+
+    QUESTION: {question}
+
+    ANSWER (format exactly like this): "{driver_full}'s last Formula 1 win was the [Grand Prix] [Year] driving for [Team]"
+
+    Answer:"""
+                    
+                    response = self.llm.invoke(prompt)
+                    cleaned = self._clean_response(response)
+                    
+                    # Ensure the response has the correct format
+                    if driver_full not in cleaned:
+                        # If LLM didn't format correctly, construct it
+                        # Extract GP and year from response
+                        gp_year_match = re.search(r'(\w+\s+Grand Prix)\s+(20\d{2})', cleaned)
+                        if gp_year_match:
+                            gp = gp_year_match.group(1)
+                            year = gp_year_match.group(2)
+                            team_match = re.search(r'driving for\s+([^.]+)', cleaned)
+                            team = team_match.group(1) if team_match else "their team"
+                            return f"{driver_full}'s last Formula 1 win was the {gp} {year} driving for {team}."
+                    
+                    return cleaned
+                else:
+                    # No wins found in knowledge base - let LLM answer from its knowledge
+                    prompt = f"""Based on your general F1 knowledge, what was {driver_full}'s most recent Formula 1 win? 
+    Include the race name, year, and team. Answer in one sentence."""
+                    response = self.llm.invoke(prompt)
+                    return self._clean_response(response)
+        
+        # ========== EXISTING SPECIAL HANDLING FOR LAST RACE ==========
         if 'last race' in question_lower or 'latest race' in question_lower or 'most recent race' in question_lower:
             for doc in self.knowledge_base:
                 if '[2026] Canadian Grand Prix' in doc:
@@ -335,63 +432,38 @@ class F1RAGAgent:
                         return f"The last race was the 2026 Canadian Grand Prix. The winner was {winner_name}."
             return "I don't have that information."
         
-        # Special handling for starting position - CLEAN VERSION
+        # ========== EXISTING SPECIAL HANDLING FOR STARTING POSITION ==========
         if 'starting position' in question_lower or 'grid position' in question_lower or 'start from' in question_lower:
             for doc in self.knowledge_base:
                 if 'Canadian Grand Prix' in doc and 'GRID:' in doc:
-                    # Extract just the position for ANT
                     match = re.search(r'P(\d+):ANT', doc)
                     if match:
                         position = match.group(1)
                         return f"Kimi Antonelli started from P{position} at the 2026 Canadian Grand Prix."
-            
-            # Fallback to searching for Kimi Antonelli
-            for doc in self.knowledge_base:
-                if 'Canadian Grand Prix' in doc and 'Kimi Antonelli' in doc:
-                    for part in doc.split('|'):
-                        if 'GRID:' in part and 'ANT' in part:
-                            grid_match = re.search(r'P(\d+):ANT', part)
-                            if grid_match:
-                                return f"Kimi Antonelli started from P{grid_match.group(1)}."
-            
             return "I don't have grid position data for that race."
         
-        # For all other questions, use regular RAG
-        relevant_docs = self.search_knowledge(question, k=3)
+        # ========== REGULAR RAG FOR ALL OTHER QUESTIONS ==========
+        relevant_docs = self.search_knowledge(question, k=4)
         
-        if not relevant_docs:
-            return "I don't have that information."
-        
-        context = "\n".join([doc for doc, _ in relevant_docs])
-        
-        prompt = f"""Answer concisely based ONLY on the data below. One sentence maximum. No greetings. No sign-offs. No repetition.
+        if relevant_docs:
+            context = "\n".join([doc for doc, _ in relevant_docs])
+            prompt = f"""Answer the question based ONLY on the data below.
 
     DATA:
     {context}
 
     QUESTION: {question}
 
+    ANSWER (concise, one sentence):"""
+            
+            response = self.llm.invoke(prompt)
+            return self._clean_response(response)
+        
+        # If no data found, use LLM's general knowledge
+        prompt = f"""Answer this F1 question based on your general knowledge.
+
+    QUESTION: {question}
     ANSWER:"""
         
-        try:
-            response = self.llm.invoke(prompt)
-            cleaned = self._clean_response(response)
-            
-            # Remove any duplicate text
-            sentences = cleaned.split('.')
-            if len(sentences) > 1:
-                # Take only first unique sentence
-                unique_sentences = []
-                for s in sentences:
-                    s = s.strip()
-                    if s and s not in unique_sentences:
-                        unique_sentences.append(s)
-                cleaned = '. '.join(unique_sentences[:1]) + '.'
-            
-            if len(cleaned) > 200:
-                cleaned = cleaned[:200]
-            
-            return cleaned if cleaned else "I don't have that information."
-            
-        except Exception as e:
-            return f"Error: {str(e)}"
+        response = self.llm.invoke(prompt)
+        return self._clean_response(response)
