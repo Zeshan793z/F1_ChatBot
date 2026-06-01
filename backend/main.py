@@ -2,9 +2,8 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 
-# Use relative imports (note the dots before agents)
+# Use relative imports
 from .agents.data_agent import get_driver_fastest_lap, get_season_fastest_laps, get_season_driver_performance
-from .agents.strategy_agent import explain_strategy
 from .agents.chat_agent import chat
 from .agents.orchestrator import Orchestrator
 
@@ -35,14 +34,14 @@ async def root():
     return {
         "message": "F1 Chatbot API is running",
         "status": "healthy",
-        "rag_enabled": rag_agent is not None,
+        "orchestrator_ready": orchestrator is not None,
         "endpoints": [
             "/fastest-lap?year=2023&gp=Miami&driver=VER",
             "/season-fastest-laps?year=2024&driver=VER",
             "/driver-season-performance?year=2024&driver=VER",
             "/multiple-seasons?years=2023,2024&driver=VER",
             "/strategy?year=2023&gp=Miami&driver=VER&question=...",
-            "/chat?question=... (now with RAG!)",
+            "/chat?question=... (Multi-Agent Orchestration!)",
             "/chat/legacy?question=... (original without RAG)"
         ]
     }
@@ -112,17 +111,17 @@ def multiple_seasons(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/strategy")
-def strategy(year: int, gp: str, driver: str, question: str):
+def strategy_endpoint(year: int, gp: str, driver: str, question: str):
     """Get strategy explanation for a driver at a specific GP"""
-    lap_data = get_driver_fastest_lap(year, gp, driver)
-    if lap_data:
-        data_str = f"Lap {lap_data['lap_number']} - {lap_data['lap_time']} on {lap_data['compound']} tires."
-    else:
-        data_str = "No lap data found."
-    response = explain_strategy(data_str, question)
+    # Use the orchestrator's strategy agent
+    if orchestrator is None:
+        return {"response": "Orchestrator not initialized"}
+    
+    # Format the question for strategy analysis
+    strategy_question = f"At the {year} {gp}, what was the strategy for {driver}? {question}"
+    response = orchestrator.strategy_agent.analyze(strategy_question)
     return {"response": response}
 
-# Change the chat_endpoint function
 @app.get("/chat")
 def chat_endpoint(question: str):
     """General F1 chat endpoint with Multi-Agent Orchestration"""
@@ -152,13 +151,13 @@ def chat_legacy_endpoint(question: str):
 
 @app.get("/chat/health")
 def chat_health():
-    """Check RAG agent status"""
-    if rag_agent is None:
-        return {"status": "not_initialized", "rag_enabled": False}
+    """Check Orchestrator status"""
+    if orchestrator is None:
+        return {"status": "not_initialized", "orchestrator_ready": False}
     return {
         "status": "ready", 
-        "rag_enabled": True,
-        "knowledge_base_loaded": rag_agent.is_initialized
+        "orchestrator_ready": True,
+        "agents": ["Data Agent", "Strategy Agent"]
     }
 
 if __name__ == "__main__":
