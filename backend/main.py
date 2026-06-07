@@ -1,6 +1,7 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Path, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
+from pathlib import Path
 
 # Use relative imports
 from .agents.data_agent import get_driver_fastest_lap, get_season_fastest_laps, get_season_driver_performance
@@ -16,6 +17,13 @@ orchestrator = None
 async def startup_event():
     """Initialize Orchestrator on startup"""
     global orchestrator
+    
+    # Clear memory on backend restart
+    memory_file = Path("data/conversation_memory.json")
+    if memory_file.exists():
+        memory_file.unlink()
+        print("🧠 Cleared conversation memory - starting fresh session")
+    
     print("🚀 Initializing F1 Orchestrator...")
     orchestrator = Orchestrator()
     print("✅ F1 Orchestrator ready!")

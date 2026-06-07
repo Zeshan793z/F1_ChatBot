@@ -5,7 +5,8 @@
     "[2026] Japanese Grand Prix | WINNER: ANT (Kimi Antonelli) - Mercedes | GRID: P1:ANT P3:PIA P4:LEC P2:RUS P5:NOR P6:HAM P7:GAS P11:VER P14:LAW P12:OCO | FL: ANT 92.432s | TIRE: HARD | PITS: ALB:6, STR:3, ALO:2",
     "[2026] Miami Grand Prix | WINNER: ANT (Kimi Antonelli) - Mercedes | GRID: P1:ANT P4:NOR P7:PIA P5:RUS P2:VER P6:HAM P8:COL P3:LEC P13:SAI P15:ALB | FL: NOR 91.869s | TIRE: HARD | PITS: BOT:3, STR:2, HUL:2",
     "[2026] Canadian Grand Prix | WINNER: ANT (Kimi Antonelli) - Mercedes | GRID: P2:ANT P5:HAM P6:VER P8:LEC P7:HAD P10:COL P12:LAW P14:GAS P15:SAI P16:BEA | FL: ANT 74.210s | TIRE: MEDIUM | PITS: PER:4, BOT:4, HAD:3",
-    "[2026] SEASON LEADER: Kimi Antonelli (ANT) with 4 wins",
+    "[2026] Monaco Grand Prix | WINNER: ANT (Kimi Antonelli) - Mercedes | GRID: P1:ANT P3:HAM P5:HAD P7:PIA P10:LAW P15:LIN P9:GAS P11:ALB P17:OCO P21:ALO | FL: ANT 73.481s | TIRE: SOFT | PITS: BOR:7, ALO:6, PER:6",
+    "[2026] SEASON LEADER: Kimi Antonelli (ANT) with 5 wins",
     "[2025] Australian Grand Prix | WINNER: NOR (Lando Norris) - McLaren | GRID: P1:NOR P3:VER P4:RUS P16:ANT P6:ALB P13:STR P17:HUL P7:LEC P2:PIA P8:HAM | FL: NOR 82.167s | TIRE: HARD | PITS: VER:5, GAS:5, ANT:5",
     "[2025] Chinese Grand Prix | WINNER: PIA (Oscar Piastri) - McLaren | GRID: P1:PIA P3:NOR P2:RUS P4:VER P11:OCO P8:ANT P10:ALB P17:BEA P14:STR P15:SAI | FL: HAM 95.069s | TIRE: HARD | PITS: TSU:3, LAW:2, HAD:2",
     "[2025] Japanese Grand Prix | WINNER: VER (Max Verstappen) - Red Bull Racing | GRID: P1:VER P2:NOR P3:PIA P4:LEC P5:RUS P6:ANT P8:HAM P7:HAD P9:ALB P10:BEA | FL: ANT 90.965s | TIRE: HARD | PITS: STR:2, VER:1, PIA:1",
@@ -108,6 +109,12 @@
       },
       {
         "gp": "Canadian Grand Prix",
+        "driver_code": "ANT",
+        "driver_name": "Kimi Antonelli",
+        "team": "Mercedes"
+      },
+      {
+        "gp": "Monaco Grand Prix",
         "driver_code": "ANT",
         "driver_name": "Kimi Antonelli",
         "team": "Mercedes"
