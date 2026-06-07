@@ -1,0 +1,56 @@
+{
+  "current_session": {
+    "conversation_history": [
+      {
+        "question": "Who won Japanese GP 2026",
+        "answer": "Kimi Antonelli (ANT) with Mercedes.",
+        "timestamp": "2026-06-08T03:01:05.105525",
+        "context": {
+          "driver": "ANT",
+          "driver_name": "Antonelli",
+          "year": 2026,
+          "gp": "Japanese Grand Prix",
+          "topic": "factual"
+        }
+      },
+      {
+        "question": "who was his teammate?",
+        "answer": "Antonelli's teammate at the Japanese Grand Prix 2026 is Russell.",
+        "timestamp": "2026-06-08T03:01:18.988933",
+        "context": {
+          "driver": "RUS",
+          "driver_name": "Russell",
+          "year": 2026,
+          "gp": "Japanese Grand Prix",
+          "topic": "factual"
+        }
+      },
+      {
+        "question": "What is his last GP won?",
+        "answer": "George Russell's last Formula 1 win was the Australian Grand Prix 2026 driving for Mercedes.",
+        "timestamp": "2026-06-08T03:03:00.680401",
+        "context": {
+          "driver": "RUS",
+          "driver_name": "Russell",
+          "year": 2026,
+          "gp": "Australian Grand Prix",
+          "topic": "factual"
+        }
+      }
+    ],
+    "last_driver": "RUS",
+    "last_driver_name": "Russell",
+    "last_gp": "Australian Grand Prix",
+    "last_year": 2026,
+    "last_topic": "factual",
+    "last_result": "George Russell's last Formula 1 win was the Australian Grand Prix 2026 driving for Mercedes.",
+    "last_team": null,
+    "last_teammate_code": "RUS",
+    "last_teammate_name": "George Russell"
+  },
+  "long_term": {
+    "driver_preferences": {},
+    "frequently_asked": {},
+    "team_drivers": {}
+  }
+}
