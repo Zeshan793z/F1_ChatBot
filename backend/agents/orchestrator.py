@@ -5,6 +5,7 @@ Orchestrator Agent - Routes questions to specialized agents with memory
 from .strategy_agent import StrategyAgent
 from .comparison_agent import ComparisonAgent
 from .memory_agent import MemoryAgent
+from .track_agent import TrackAgent
 
 
 class Orchestrator:
@@ -20,13 +21,14 @@ class Orchestrator:
         self.strategy_agent = StrategyAgent()
         self.comparison_agent = ComparisonAgent()
         self.memory_agent = MemoryAgent()
+        self.track_agent = TrackAgent()  # NEW
         
         # Initialize knowledge base
         print("📚 Loading knowledge base...")
         self.data_agent.initialize_knowledge_base(force_reload=False)
         
         print(f"📊 Knowledge base loaded: {len(self.data_agent.knowledge_base)} documents")
-        print("✅ Orchestrator ready with Data Agent, Strategy Agent, Comparison Agent, and Memory Agent!")
+        print("✅ Orchestrator ready with Data Agent, Strategy Agent, Comparison Agent, Memory Agent, and Track Agent!")
     
     def route(self, question: str) -> str:
         """Send the question to the right agent based on question type"""
@@ -45,12 +47,10 @@ class Orchestrator:
             return f"🧠 **Memory Statistics**\n\n• Conversation length: {stats['conversation_length']} exchanges\n• Last driver: {stats['last_driver']}\n• Last GP: {stats['last_gp']}\n• Last year: {stats['last_year']}"
         
         # FIRST: Check for teammate questions BEFORE enhancing
-        # This ensures we catch "who was his teammate?" type questions
         teammate_indicators = ['teammate', 'team mate', 'team-mate', 'his teammate', 'her teammate', 'their teammate']
         is_teammate_question = any(indicator in question_lower for indicator in teammate_indicators)
         
         if is_teammate_question:
-            # Check if we have a driver in memory
             if self.memory_agent.session_memory['current_session'].get('last_driver'):
                 print(f"👥 Teammate question detected directly in orchestrator")
                 result = self.memory_agent.get_teammate_answer(question)
@@ -61,6 +61,21 @@ class Orchestrator:
         
         # Enhance question with memory for other types of follow-ups
         enhanced_question = self.memory_agent.enhance_question(question)
+        
+        # TRACK ANALYSIS QUESTIONS - NEW (Highest priority for circuit-related queries)
+        track_keywords = [
+            'circuit', 'track', 'monaco', 'spa', 'monza', 'silverstone', 
+            'suzuka', 'singapore', 'bahrain', 'austria', 'canada', 'miami',
+            'length', 'corners', 'lap record', 'overtaking', 'downforce',
+            'tire wear', 'brake wear', 'track length', 'corner', 'sector',
+            'melbourne', 'albert park', 'zandvoort', 'cota', 'mexico', 'interlagos',
+            'baku', 'yas marina', 'hungaroring'
+        ]
+        if any(keyword in question_lower for keyword in track_keywords):
+            print(f"🏁 [Track Question] Routing to Track Agent")
+            result = self.track_agent.analyze_track(enhanced_question)
+            self.memory_agent.update_memory(question, result)
+            return result
         
         # Weather questions
         weather_keywords = [

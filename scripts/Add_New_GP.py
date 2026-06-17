@@ -5,13 +5,13 @@ from pathlib import Path
 cache_dir = Path("./data/fastf1_cache")
 fastf1.Cache.enable_cache(str(cache_dir))
 
-print("📥 Downloading Monaco GP 2026 data...")
+print("📥 Downloading Barcelona GP 2026 data...")
 
 # Load the session - this will automatically download the data
-session = fastf1.get_session(2026, "Monaco Grand Prix", "R")
+session = fastf1.get_session(2026, "Barcelona Grand Prix", "R")
 session.load(telemetry=True, laps=True, weather=True)
 
-print("✅ Monaco GP 2026 data downloaded and cached!")
+print("✅ Barcelona GP 2026 data downloaded and cached!")
 print(f"📍 Cache location: {cache_dir}/2026/")
 
 # Verify the data

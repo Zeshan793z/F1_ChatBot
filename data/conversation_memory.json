@@ -1,0 +1,32 @@
+{
+  "current_session": {
+    "conversation_history": [
+      {
+        "question": "Who won the Canadian GP 2026",
+        "answer": "Kimi Antonelli (ANT) won the Canadian Grand Prix in 2026.",
+        "timestamp": "2026-06-18T04:54:38.023323",
+        "context": {
+          "driver": "ANT",
+          "driver_name": "Antonelli",
+          "year": 2026,
+          "gp": "Canadian Grand Prix",
+          "topic": "factual"
+        }
+      }
+    ],
+    "last_driver": "ANT",
+    "last_driver_name": "Antonelli",
+    "last_gp": "Canadian Grand Prix",
+    "last_year": 2026,
+    "last_topic": "factual",
+    "last_result": "Kimi Antonelli (ANT) won the Canadian Grand Prix in 2026.",
+    "last_team": null,
+    "last_teammate_code": null,
+    "last_teammate_name": null
+  },
+  "long_term": {
+    "driver_preferences": {},
+    "frequently_asked": {},
+    "team_drivers": {}
+  }
+}
